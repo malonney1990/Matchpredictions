@@ -11,9 +11,10 @@ import java.time.Instant
 import java.time.LocalDate
 import java.util.concurrent.ConcurrentHashMap
 
-data class Comp(val name: String, val oddsSportKey: String)
+/** espnSlug != null: la competición se lee de ESPN (no oficial, sin clave); si es null, de football-data.org. */
+data class Comp(val name: String, val oddsSportKey: String, val espnSlug: String? = null)
 
-/** Las 8 competiciones de tu lista que cubre el plan gratis de football-data.org. */
+/** Las 12 competiciones: 8 por football-data.org (plan gratis) y 4 por ESPN. */
 object Competitions {
     val all: Map<String, Comp> = linkedMapOf(
         "PD" to Comp("LaLiga", "soccer_spain_la_liga"),
@@ -24,7 +25,14 @@ object Competitions {
         "BL1" to Comp("Bundesliga", "soccer_germany_bundesliga"),
         "DED" to Comp("Eredivisie", "soccer_netherlands_eredivisie"),
         "CL" to Comp("UEFA Champions League", "soccer_uefa_champs_league"),
+        "KSA" to Comp("Saudi Pro League", "soccer_saudi_arabia_pro_league", "ksa.1"),
+        "BEL" to Comp("Belgian Pro League", "soccer_belgium_first_div", "bel.1"),
+        "UEL" to Comp("UEFA Europa League", "soccer_uefa_europa_league", "uefa.europa"),
+        "UECL" to Comp("UEFA Conference League", "soccer_uefa_europa_conf_league", "uefa.europa.conf"),
     )
+
+    /** Códigos que se piden a football-data.org. */
+    val footballData: List<String> = all.filter { it.value.espnSlug == null }.keys.toList()
 }
 
 data class TeamTable(val played: Int, val gf: Int, val ga: Int)
@@ -170,7 +178,7 @@ class FootballDataClient(
     /** Partidos del día (GMT) de las 8 competiciones. dateTo es exclusivo en la API, por eso se pide hasta el día siguiente. */
     suspend fun fixtures(dateIso: String): List<Fixture> {
         val next = LocalDate.parse(dateIso).plusDays(1).toString()
-        val codes = Competitions.all.keys.joinToString(",")
+        val codes = Competitions.footballData.joinToString(",")
         val json = get("/matches?dateFrom=$dateIso&dateTo=$next&competitions=$codes")
         val arr = json.optJSONArray("matches") ?: return emptyList()
         val order = Competitions.all.keys.toList()

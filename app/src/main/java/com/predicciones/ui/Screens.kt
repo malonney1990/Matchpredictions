@@ -65,6 +65,7 @@ fun AlmanaqueScreen(vm: AlmanaqueViewModel) {
     val loading by vm.loading.collectAsState()
     val error by vm.error.collectAsState()
     val err = error
+    val warnings by vm.warnings.collectAsState()
     val grouped = remember(fixtures) { fixtures.groupBy { it.leagueName } }
 
     Scaffold(
@@ -98,6 +99,14 @@ fun AlmanaqueScreen(vm: AlmanaqueViewModel) {
                 fixtures.isEmpty() -> Text(
                     "No hay partidos este día en las competiciones disponibles.",
                     modifier = Modifier.padding(16.dp),
+                )
+            }
+            warnings.forEach {
+                Text(
+                    it,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp),
                 )
             }
             LazyColumn(Modifier.fillMaxSize()) {
@@ -146,6 +155,10 @@ fun SettingsScreen(vm: AlmanaqueViewModel) {
     ) { padding ->
         Column(Modifier.padding(padding).padding(16.dp).verticalScroll(rememberScrollState())) {
             Text("Las claves se guardan solo en este teléfono.", style = MaterialTheme.typography.bodySmall)
+            Text(
+                "Saudi Pro League, liga belga, Europa League y Conference League se leen de ESPN y no necesitan clave.",
+                style = MaterialTheme.typography.bodySmall,
+            )
             Spacer(Modifier.height(16.dp))
             OutlinedTextField(
                 value = footballKey,

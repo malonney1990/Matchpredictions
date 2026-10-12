@@ -5,6 +5,8 @@ import android.util.Log
 import androidx.room.Room
 import com.predicciones.data.ApiKeyStore
 import com.predicciones.data.AppDatabase
+import com.predicciones.data.CompositeResultsSource
+import com.predicciones.data.EspnClient
 import com.predicciones.data.FootballDataClient
 import com.predicciones.data.MatchesSource
 import com.predicciones.data.OddsApiClient
@@ -32,10 +34,11 @@ class PredictionApp : Application() {
         super.onCreate()
         keys = ApiKeyStore(this)
         val football = FootballDataClient(keys)
-        matchesSource = RealMatchesSource(football, OddsApiClient(keys, cacheDir))
+        val espn = EspnClient()
+        matchesSource = RealMatchesSource(football, espn, OddsApiClient(keys, cacheDir))
 
         val db = Room.databaseBuilder(this, AppDatabase::class.java, "predicciones.db").build()
-        repository = PredictionRepository(RoomRecordStore(db.records()), football)
+        repository = PredictionRepository(RoomRecordStore(db.records()), CompositeResultsSource(football, espn))
 
         // Al abrir: reentrena con el historial y cierra los partidos que ya terminaron.
         appScope.launch {

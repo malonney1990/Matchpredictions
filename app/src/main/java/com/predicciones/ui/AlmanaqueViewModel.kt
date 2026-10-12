@@ -45,6 +45,9 @@ class AlmanaqueViewModel(app: Application) : AndroidViewModel(app) {
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
 
+    private val _warnings = MutableStateFlow<List<String>>(emptyList())
+    val warnings: StateFlow<List<String>> = _warnings.asStateFlow()
+
     private val _detail = MutableStateFlow<DetailState?>(null)
     val detail: StateFlow<DetailState?> = _detail.asStateFlow()
 
@@ -73,11 +76,14 @@ class AlmanaqueViewModel(app: Application) : AndroidViewModel(app) {
             _loading.value = true
             _error.value = null
             try {
-                _fixtures.value = source.fixtures(_date.value.toString())
+                val day = source.fixturesWithWarnings(_date.value.toString())
+                _fixtures.value = day.fixtures
+                _warnings.value = day.warnings
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 _fixtures.value = emptyList()
+                _warnings.value = emptyList()
                 _error.value = e.message ?: "No se pudieron cargar los partidos."
             } finally {
                 _loading.value = false
