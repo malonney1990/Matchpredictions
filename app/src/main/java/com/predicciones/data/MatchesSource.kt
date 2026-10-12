@@ -9,9 +9,13 @@ data class Fixture(
     val homeName: String,
     val awayId: String,
     val awayName: String,
+    val competitionCode: String = "",
+    val utcMillis: Long = 0L,
+    val homeShort: String = "",
+    val awayShort: String = "",
 )
 
-/** Fuente de partidos del almanaque. La implementación real (APIs públicas) reemplaza a SampleMatchesSource. */
+/** Fuente de partidos del almanaque. */
 interface MatchesSource {
     suspend fun fixtures(dateIso: String): List<Fixture>
     suspend fun predictionRequest(fixture: Fixture): PredictionRequest

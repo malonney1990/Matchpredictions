@@ -43,6 +43,7 @@ data class PredictionRequest(
     val h2h: List<H2HMatch> = emptyList(),
     val dataConfidence: Double = 1.0,
     val runs: Int = 10_000,
+    val notes: List<String> = emptyList(),   // avisos para mostrar en pantalla (cuotas ausentes, etc.)
 )
 
 class PredictionRepository(
